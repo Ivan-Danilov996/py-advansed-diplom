@@ -186,5 +186,5 @@ class Bot:
 
 
 if __name__ == '__main__':
-    bot = Bot(token, token_user)
+    bot = Bot()
     bot.main()
