@@ -12,10 +12,6 @@ class BotDB:
             INSERT INTO Users (vk_id, sex, status, age, city) VALUES
             ({user['id']}, {user['sex']}, {user['status']}, {user['age']}, {user['city']})
         """)
-        self.connection.execute(f"""
-            INSERT INTO UsersSearch (vk_id, usersid) VALUES
-            ({search_id}, {user['id']})
-        """)
 
     def add_search_user(self, user, id):
         self.connection.execute(f"""
@@ -47,6 +43,23 @@ class BotDB:
             return None
         return [user[0] for user in users]
 
+    def crete_tables(self):
+        self.connection.execute(f"""
+                    CREATE TABLE IF NOT EXISTS Users (
+                    	Id SERIAL PRIMARY KEY,
+	                    Sex INTEGER NOT NULL,
+	                    City INTEGER NOT NULL,
+	                    Status INTEGER NOT NULL,
+	                    Age INTEGER NOT NULL,
+	                    Vk_id INTEGER NOT NULL
+                    );
+
+                    CREATE TABLE IF NOT EXISTS Userssearch (
+	                    Id SERIAL PRIMARY KEY,
+	                    Vk_id INTEGER NOT NULL,
+	                    UsersID INTEGER REFERENCES Users(Id) NOT NULL
+                    );
+                    """)
 
 # bot = BotDB()
 # print(bot.get_user(1))

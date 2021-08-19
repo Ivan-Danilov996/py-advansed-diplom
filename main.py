@@ -78,8 +78,6 @@ class Bot:
                             self.write_msg(event.user_id, "Не поняла вашего ответа...")
                             self.process_info(user)
 
-
-
     def get_sex(self, id):
         self.write_msg(id, 'Введие ваш пол в формате "м" или "Ж"')
 
@@ -157,12 +155,12 @@ class Bot:
         data = search_users(user, token, self.count)
         self.write_msg(user['id'],
                        f'https://vk.com/id{data["id"]}, {data["photos"][0]["url"]}, {data["photos"][1]["url"]}, {data["photos"][2]["url"]}')
+        self.db.crete_tables()
         if self.current_user:
             self.db.add_search_user(user, data["id"])
         else:
             self.db.add_search_user(user, data["id"])
             self.db.add_user(user)
-
 
     def get_user(self, user_id):
         params = {
