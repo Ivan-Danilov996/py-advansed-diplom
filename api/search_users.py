@@ -3,7 +3,7 @@ from pprint import pprint
 
 
 def get_most_popular_photo(data):
-    photos = [{'count': 0, 'url': ''}, {'count': 0, 'url': ''}, {'count': 0, 'url': ''}]
+    photos = [{'count': 0, 'url': '', 'id': ''}, {'count': 0, 'url': '', 'id': ''}, {'count': 0, 'url': '', 'id': ''}]
     for i in range(3):
         for photo in data:
             count = photo['likes']['count'] + photo['comments']['count']
@@ -11,14 +11,18 @@ def get_most_popular_photo(data):
                 if photos[i]['count'] < count:
                     photos[i]['count'] = count
                     photos[i]['url'] = photo['sizes'][-1]['url']
+                    photos[i]['id'] = photo['id']
             if i == 1:
                 if photos[i]['count'] < count and photos[0]['url'] != photo['sizes'][-1]['url']:
                     photos[i]['count'] = count
                     photos[i]['url'] = photo['sizes'][-1]['url']
+                    photos[i]['id'] = photo['id']
             if i == 2:
-                if photos[i]['count'] < count and photos[0]['url'] != photo['sizes'][-1]['url'] and photos[1]['url'] != photo['sizes'][-1]['url']:
+                if photos[i]['count'] < count and photos[0]['url'] != photo['sizes'][-1]['url'] and photos[1]['url'] != \
+                        photo['sizes'][-1]['url']:
                     photos[i]['count'] = count
                     photos[i]['url'] = photo['sizes'][-1]['url']
+                    photos[i]['id'] = photo['id']
     return photos
 
 
@@ -31,6 +35,7 @@ def get_photo(id, token_user):
         'access_token': token_user,
     }
     result = create_request('photos.get', params)
+    print(result)
     photos_data = result['response']['items']
     return get_most_popular_photo(photos_data)
 
@@ -52,8 +57,22 @@ def search_users(user, token_user, count):
     result = create_request('users.search', params)
     pprint(result)
     user_id = result['response']['items'][0]['id']
-    photos = get_photo(user_id, token_user)
+    if is_private(user_id, token_user):
+        return {
+            'id': user_id,
+            'photos': []
+        }
     return {
         'id': user_id,
-        'photos': photos
+        'photos': get_photo(user_id, token_user)
     }
+
+
+def is_private(id, token_user):
+    params = {
+        'user_ids': id,
+        'v': '5.131',
+        'access_token': token_user,
+    }
+    result = create_request('users.get', params)
+    return result['response'][0]['is_closed']

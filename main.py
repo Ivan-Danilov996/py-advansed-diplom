@@ -19,22 +19,6 @@ def check_status(string):
     return re.match(r"^[1-8]", string) and len(string) == 1
 
 
-def check_city(self, string, id, token):
-    params = {
-        'access_token': token,
-        'q': string,
-        'country_id': 1,
-        'count': 1,
-        'v': '5.131'
-    }
-    result = create_request('database.getCities', params)
-    if len(result['response']['items']) > 0:
-        city_id = result['response']['items'][0]['id']
-        for us in self.USERS:
-            if us['id'] == id:
-                us['city'] = city_id
-        return True
-    return False
 
 
 class Bot:
@@ -72,7 +56,7 @@ class Bot:
                         elif self.question == 'status' and check_status(request):
                             self.add_status(request, event.user_id)
                             self.process_info(user)
-                        elif self.question == 'city' and check_city(request, event.user_id, self.token_user):
+                        elif self.question == 'city' and self.check_city(request, event.user_id, self.token_user):
                             self.process_info(user)
                         else:
                             self.write_msg(event.user_id, "Не поняла вашего ответа...")
@@ -108,6 +92,26 @@ class Bot:
             'age': '',
             'status': new_user['status']
         })
+
+    def check_city(self, string, id, token):
+        params = {
+            'access_token': token,
+            'q': string,
+            'country_id': 1,
+            'count': 1,
+            'v': '5.131'
+        }
+        print(string)
+        print(params)
+        result = create_request('database.getCities', params)
+        print(result)
+        if len(result['response']['items']) > 0:
+            city_id = result['response']['items'][0]['id']
+            for us in self.USERS:
+                if us['id'] == id:
+                    us['city'] = city_id
+            return True
+        return False
 
     def add_age(self, age, id):
         for us in self.USERS:
@@ -153,18 +157,25 @@ class Bot:
         if self.current_user:
             self.count = len(self.db.get_search_user(user['id']))
         data = search_users(user, token, self.count)
+        if len(data["photos"]) > 0:
+            attachment = f"""photo{data["id"]}_{data["photos"][0]["id"]}, 
+                        photo{data["id"]}_{data["photos"][1]["id"]}, 
+                        photo{data["id"]}_{data["photos"][2]["id"]}"""
+        else:
+            attachment = None
         self.write_msg(user['id'],
-                       f'https://vk.com/id{data["id"]}, {data["photos"][0]["url"]}, {data["photos"][1]["url"]}, {data["photos"][2]["url"]}')
+                       f'https://vk.com/id{data["id"]}', attachment)
         self.db.crete_tables()
         if self.current_user:
             self.db.add_search_user(user, data["id"])
         else:
-            self.db.add_search_user(user, data["id"])
             self.db.add_user(user)
+            self.db.add_search_user(user, data["id"])
+
 
     def get_user(self, user_id):
         params = {
-            'access_token': token,
+            'access_token': self.token,
             'user_ids': user_id,
             'v': '5.89',
             'fields': 'sex, city, status'
@@ -179,8 +190,8 @@ class Bot:
             self.add_user(user)
             self.check_info(user['id'])
 
-    def write_msg(self, user_id, message):
-        self.vk.method('messages.send', {'user_id': user_id, 'message': message, 'random_id': randrange(10 ** 7), })
+    def write_msg(self, user_id, message, attachment=None):
+        self.vk.method('messages.send', {'user_id': user_id, 'message': message, 'random_id': randrange(10 ** 7), 'attachment': attachment})
 
 
 if __name__ == '__main__':

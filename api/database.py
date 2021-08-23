@@ -57,7 +57,7 @@ class BotDB:
                     CREATE TABLE IF NOT EXISTS Userssearch (
 	                    Id SERIAL PRIMARY KEY,
 	                    Vk_id INTEGER NOT NULL,
-	                    UsersID INTEGER REFERENCES Users(Id) NOT NULL
+	                    UsersID INTEGER REFERENCES Users(Vk_id) NOT NULL
                     );
                     """)
 
