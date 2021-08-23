@@ -4,6 +4,8 @@ from pprint import pprint
 
 def get_most_popular_photo(data):
     photos = [{'count': 0, 'url': '', 'id': ''}, {'count': 0, 'url': '', 'id': ''}, {'count': 0, 'url': '', 'id': ''}]
+    print('photos')
+    pprint(data)
     for i in range(3):
         for photo in data:
             count = photo['likes']['count'] + photo['comments']['count']
@@ -35,7 +37,6 @@ def get_photo(id, token_user):
         'access_token': token_user,
     }
     result = create_request('photos.get', params)
-    print(result)
     photos_data = result['response']['items']
     return get_most_popular_photo(photos_data)
 

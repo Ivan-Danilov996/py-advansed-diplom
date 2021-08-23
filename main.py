@@ -157,12 +157,13 @@ class Bot:
         if self.current_user:
             self.count = len(self.db.get_search_user(user['id']))
         data = search_users(user, token, self.count)
+        print('out')
+        print(data)
         if len(data["photos"]) > 0:
-            attachment = f"""photo{data["id"]}_{data["photos"][0]["id"]}, 
-                        photo{data["id"]}_{data["photos"][1]["id"]}, 
-                        photo{data["id"]}_{data["photos"][2]["id"]}"""
+            attachment = f"""photo{data["id"]}_{data["photos"][0]["id"]},photo{data["id"]}_{data["photos"][1]["id"]},photo{data["id"]}_{data["photos"][2]["id"]}"""
         else:
             attachment = None
+        print(attachment)
         self.write_msg(user['id'],
                        f'https://vk.com/id{data["id"]}', attachment)
         self.db.crete_tables()
